@@ -1,0 +1,2387 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Microtargeting Político — Banco Audiovisual G01</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  #binaryCanvas {
+  display: block;
+  background: #0a0a0f;
+  border-radius: 12px;
+  width: 100%;
+}
+.overlay-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  pointer-events: none;
+}
+.overlay-text h2 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: #f0eee8;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin: 0 0 6px;
+}
+.overlay-text h2 span { color: #e04c2f; }
+.overlay-text p {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  color: rgba(255,255,255,0.3);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin: 0;
+}
+  .resource-card-img {
+    width: 100%;
+    height: 160px;
+    overflow: hidden;
+    border-radius: var(--border-radius, 8px) var(--border-radius, 8px) 0 0;
+  }
+  .resource-card-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s ease;
+  }
+  .resource-card:hover .resource-card-img img {
+    transform: scale(1.04);
+  }
+  .resource-card-img-fallback {
+    width: 100%;
+    height: 160px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: #888;
+  }
+  :root {
+    --bg: #0a0a0f;
+    --bg2: #111118;
+    --bg3: #1a1a24;
+    --accent: #e04c2f;
+    --accent2: #f5a623;
+    --blue: #3b82f6;
+    --teal: #14b8a6;
+    --purple: #8b5cf6;
+    --text: #f0eee8;
+    --text2: #a09e98;
+    --text3: #6b6968;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.15);
+    --card-bg: #13131b;
+    --tag-bg: rgba(224,76,47,0.15);
+    --font: 'Space Grotesk', sans-serif;
+    --mono: 'Space Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    line-height: 1.6;
+    font-size: 15px;
+  }
+
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* NAV */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(10,10,15,0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+  }
+
+  .nav-logo {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 2rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-size: 13px;
+    color: var(--text2);
+    font-weight: 500;
+    letter-spacing: 0.03em;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover {
+    color: var(--text);
+    text-decoration: none;
+  }
+
+  /* HERO */
+  .hero {
+    min-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 4rem 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(224,76,47,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(224,76,47,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+  }
+
+  .hero-glow {
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(224,76,47,0.12) 0%, transparent 70%);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+
+  .hero-eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1.5rem;
+    position: relative;
+  }
+
+  .hero h1 {
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    max-width: 900px;
+    position: relative;
+    margin-bottom: 1.5rem;
+  }
+
+  .hero h1 span {
+    color: var(--accent);
+  }
+
+  .hero-sub {
+    font-size: 1.1rem;
+    color: var(--text2);
+    max-width: 640px;
+    margin-bottom: 2.5rem;
+    position: relative;
+    line-height: 1.7;
+  }
+
+  .hero-stats {
+    display: flex;
+    gap: 3rem;
+    position: relative;
+    margin-bottom: 3rem;
+  }
+
+  .hero-stat strong {
+    display: block;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--accent);
+    font-family: var(--mono);
+    line-height: 1;
+  }
+
+  .hero-stat span {
+    font-size: 12px;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .hero-question {
+    background: rgba(224,76,47,0.08);
+    border: 1px solid rgba(224,76,47,0.25);
+    border-radius: 12px;
+    padding: 1.25rem 2rem;
+    max-width: 700px;
+    position: relative;
+    font-size: 1rem;
+    color: var(--text2);
+    font-style: italic;
+  }
+
+  .hero-question strong {
+    color: var(--text);
+    font-style: normal;
+  }
+
+  /* SECTION BASE */
+  section {
+    padding: 5rem 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .section-eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.75rem;
+  }
+
+  .section-title {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.5rem;
+    line-height: 1.2;
+  }
+
+  .section-desc {
+    color: var(--text2);
+    max-width: 600px;
+    margin-bottom: 3rem;
+    line-height: 1.7;
+  }
+
+  /* TAGS */
+  .tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 4px;
+    font-family: var(--mono);
+  }
+
+  .tag-cont { background: rgba(59,130,246,0.15); color: #60a5fa; }
+  .tag-test { background: rgba(20,184,166,0.15); color: #2dd4bf; }
+  .tag-conc { background: rgba(139,92,246,0.15); color: #a78bfa; }
+  .tag-cas  { background: rgba(245,166,35,0.15); color: #fbbf24; }
+  .tag-arc  { background: rgba(224,76,47,0.15); color: #fb923c; }
+
+  .tag-status-avail { background: rgba(20,184,166,0.1); color: #2dd4bf; border: 1px solid rgba(20,184,166,0.2); }
+  .tag-status-pend { background: rgba(245,166,35,0.1); color: #fbbf24; border: 1px solid rgba(245,166,35,0.2); }
+
+  /* FILTER BAR */
+  .filter-bar {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 2.5rem;
+  }
+
+  .filter-btn {
+    padding: 6px 16px;
+    border-radius: 20px;
+    border: 1px solid var(--border2);
+    background: transparent;
+    color: var(--text2);
+    font-size: 13px;
+    font-family: var(--font);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .filter-btn:hover, .filter-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+  }
+
+  /* RESOURCE GRID */
+  .resource-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.25rem;
+  }
+
+  .resource-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem;
+    transition: border-color 0.2s, transform 0.2s;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .resource-card:hover {
+    border-color: var(--border2);
+    transform: translateY(-2px);
+  }
+
+  .resource-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .resource-id {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text3);
+  }
+
+  .resource-type-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  .resource-desc {
+    font-size: 13.5px;
+    color: var(--text);
+    line-height: 1.55;
+  }
+
+  .resource-relation {
+    font-size: 12px;
+    color: var(--text3);
+    line-height: 1.5;
+    border-left: 2px solid var(--border2);
+    padding-left: 0.75rem;
+  }
+
+  .resource-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .resource-year {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text3);
+  }
+
+  .resource-link {
+    font-size: 12px;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  /* VIDEO SECTION */
+  .video-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.25rem;
+  }
+
+  .video-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+
+  .video-card:hover {
+    border-color: var(--border2);
+    transform: translateY(-2px);
+  }
+
+  .video-thumb {
+    position: relative;
+    padding-bottom: 56.25%;
+    background: var(--bg3);
+    overflow: hidden;
+  }
+
+  .video-thumb iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+
+  .video-thumb-placeholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    color: var(--text2);
+    transition: background 0.2s;
+    background: var(--bg3);
+  }
+
+  .video-thumb-placeholder:hover {
+    background: var(--bg2);
+    text-decoration: none;
+  }
+
+  .video-play-icon {
+    width: 48px;
+    height: 48px;
+    background: var(--accent);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 18px;
+  }
+
+  .video-info {
+    padding: 1rem 1.25rem;
+  }
+
+  .video-info h3 {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+  }
+
+  .video-info p {
+    font-size: 12px;
+    color: var(--text3);
+    line-height: 1.5;
+  }
+
+  /* TIMELINE */
+  .timeline {
+    position: relative;
+    padding-left: 2rem;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: linear-gradient(to bottom, var(--accent), transparent);
+  }
+
+  .timeline-item {
+    position: relative;
+    margin-bottom: 2.5rem;
+    padding-left: 1.5rem;
+  }
+
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -2rem;
+    top: 6px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 2px solid var(--bg);
+    box-shadow: 0 0 0 3px rgba(224,76,47,0.2);
+  }
+
+  .timeline-year {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+    margin-bottom: 0.25rem;
+  }
+
+  .timeline-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 0.5rem;
+  }
+
+  .timeline-desc {
+    font-size: 13.5px;
+    color: var(--text2);
+    line-height: 1.6;
+  }
+
+  /* CHARTS */
+.chart-wrapper {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  position: relative;
+  display: block;
+  will-change: transform;
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.chart-wrapper:hover {
+  transform: scale(1.05) !important;
+  border: 2px solid red !important;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+  z-index: 2;
+}
+
+.chart-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text2);
+  margin-bottom: 1.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-family: var(--mono);
+}
+
+
+  /* TESTIMONIALS */
+  .testimony-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.25rem;
+  }
+
+  .testimony-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: border-color 0.2s;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .testimony-card:hover {
+    border-color: rgba(20,184,166,0.3);
+  }
+
+  .testimony-quote {
+    font-size: 13.5px;
+    color: var(--text2);
+    line-height: 1.65;
+    font-style: italic;
+  }
+
+  .testimony-source {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .testimony-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .testimony-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .testimony-role {
+    font-size: 11px;
+    color: var(--text3);
+    margin-top: 1px;
+  }
+
+  /* OCEAN model */
+  .ocean-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+
+  .ocean-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem 1rem;
+    text-align: center;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+
+  .ocean-card:hover {
+    border-color: var(--border2);
+    transform: translateY(-3px);
+  }
+
+  .ocean-letter {
+    font-family: var(--mono);
+    font-size: 2.5rem;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+  }
+
+  .ocean-word {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 0.25rem;
+  }
+
+  .ocean-desc {
+    font-size: 11px;
+    color: var(--text3);
+    line-height: 1.4;
+  }
+
+  /* ARCHIVE */
+  .archive-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .archive-item {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: border-color 0.2s;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .archive-item:hover {
+    border-color: var(--border2);
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .archive-item-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  .archive-item-body {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .archive-item-title {
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .archive-item-desc {
+    font-size: 12px;
+    color: var(--text3);
+    line-height: 1.4;
+  }
+
+  .archive-item-year {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text3);
+    flex-shrink: 0;
+  }
+
+  /* STATS BANNER */
+  .stats-banner {
+    background: linear-gradient(135deg, rgba(224,76,47,0.1) 0%, rgba(139,92,246,0.1) 100%);
+    border: 1px solid rgba(224,76,47,0.2);
+    border-radius: 16px;
+    padding: 3rem;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+    text-align: center;
+    margin-bottom: 5rem;
+  }
+
+  .stat-item strong {
+    display: block;
+    font-family: var(--mono);
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 0.5rem;
+  }
+
+  .stat-item span {
+    font-size: 12px;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 2.5rem 2rem;
+    text-align: center;
+    color: var(--text3);
+    font-size: 12px;
+    font-family: var(--mono);
+    letter-spacing: 0.04em;
+  }
+
+  footer a { color: var(--accent); }
+
+  /* HIDDEN CARDS */
+  .resource-card[data-cat].hidden { display: none; }
+
+  /* DIVIDER */
+  .full-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 0;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    .hero-stats { flex-direction: column; gap: 1.5rem; }
+    .stats-banner { grid-template-columns: repeat(2, 1fr); }
+    .ocean-grid { grid-template-columns: repeat(3, 1fr); }
+    nav .nav-links { display: none; }
+  }
+
+  /* SCROLL ANIMATIONS */
+.fade-in {
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.fade-in.visible {
+  opacity: 1;
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">G01 · · Microtargeting</div>
+  <ul class="nav-links">
+    <li><a href="#recursos">Recursos</a></li>
+    <li><a href="#videos">Videos</a></li>
+    <li><a href="#testimonios">Testimonios</a></li>
+    <li><a href="#casos">Casos</a></li>
+    <li><a href="#datos">Datos</a></li>
+    <li><a href="#colaboradores">colaboradores</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<!-- HERO -->
+<div class="hero" style="position: relative;">
+  <!-- CANVAS ANIMADO -->
+  <canvas id="binaryCanvas" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; opacity: 0.15; pointer-events: none;"></canvas>
+  
+  <div class="hero-grid" style="z-index: 1;"></div>
+  <div class="hero-glow" style="z-index: 1;"></div>
+  
+  <div style="position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+    <div class="hero-eyebrow">UCA · Comunicación Social · G01 ·</div>
+    <h1>Detrás del algoritmo electoral<br><span>Microtargeting político</span><br>en la era digital</h1>
+    <p class="hero-sub">El uso de tácticas de microtargeting por presidentes en Facebook, Instagram y TikTok durante períodos electorales.</p>
+    <div class="hero-stats">
+      <div class="hero-stat"><strong>34</strong><span>recursos</span></div>
+      <div class="hero-stat"><strong>8</strong><span>casos documentados</span></div>
+      <div class="hero-stat"><strong>$300M+</strong><span>gastados en Facebook 2020</span></div>
+    </div>
+    <div class="hero-question"><strong>¿Cómo influye el uso de las tácticas de microtargeting en Facebook, Instagram y TikTok por parte de los presidentes durante períodos electorales en la decisión de voto de los ciudadanos?</strong> </div>
+  </div>
+</div>
+
+<hr class="full-divider">
+<!-- SINOPSIS -->
+<section id="sinopsis" style="position: relative; overflow: hidden;">
+
+  <!-- LÍNEA DECORATIVA SVG -->
+  <svg style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none;" 
+       viewBox="0 0 1200 800" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M 150 80 
+             C 250 120, 380 100, 420 180 
+             C 460 260, 360 290, 300 280 
+             C 200 265, 180 320, 220 380 
+             C 280 460, 380 480, 420 560 
+             C 450 630, 380 700, 320 740"
+          fill="none" 
+          stroke="rgba(224,76,47,0.4)" 
+          stroke-width="1.5" 
+          stroke-dasharray="4 5"
+          stroke-linecap="round"/>
+  </svg>
+
+  <div class="section-eyebrow" style="position: relative; z-index: 1;">UCA · Comunicación Social · G01</div>
+  <h2 class="section-title" style="position: relative; z-index: 1;">Sinopsis</h2>
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center; margin-top: 2rem; position: relative; z-index: 1;">
+
+    <div class="fade-in" style="display: flex; flex-direction: column; gap: 1.5rem;">
+      <p style="color: var(--text2); line-height: 1.8; font-size: 14.5px;">
+        El proyecto documental investiga cómo los presidentes y candidatos presidenciales utilizan tácticas de microtargeting en Facebook, Instagram y TikTok durante períodos electorales para influir en la decisión de voto de los ciudadanos.
+      </p>
+      <p style="color: var(--text2); line-height: 1.8; font-size: 14.5px;">
+        El fenómeno no es reciente. Desde la campaña de Obama en 2008, las campañas presidenciales comenzaron a usar redes sociales para segmentar audiencias y personalizar mensajes políticos. Con el tiempo, esa segmentación evolucionó de ser demográfica básica a psicográfica profunda: en 2016, Cambridge Analytica construyó perfiles psicológicos de 87 millones de usuarios de Facebook sin su consentimiento, usando el modelo OCEAN para identificar los miedos, valores y puntos de quiebre emocional de cada votante, y entregó esa información a las campañas de Ted Cruz y Donald Trump.
+      </p>
+    </div>
+
+    <div class="fade-in" style="position: relative; display: flex; justify-content: center; align-items: center; min-height: 440px;">
+
+      <div style="
+        position: absolute;
+        width: 75%;
+        height: 200%;
+        background: #ffffff;
+        border-radius: 100% 100% 0 0 / 40% 40% 0 0;
+        right: 0;
+        top: 0;
+        opacity: 0.85;
+        z-index: 1;
+      "></div>
+
+      <div style="
+        position: absolute;
+        width: 65%;
+        height: 150%;
+        background: #6f6f6f;
+        border-radius: 100% 100% 0 0 / 35% 35% 0 0;
+        left: 8%;
+        top: 15%;
+        opacity: 0.85;
+        z-index: 2;
+      "></div>
+
+      <img src="https://weseenow.co.uk/wp-content/uploads/2018/08/Microtargeting-for-marketers.jpg" alt="Modelo OCEAN — Cambridge Analytica"
+        style="
+          position: relative;
+          z-index: 3;
+          width: 42%;
+          border-radius: 6px;
+          box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+          display: block;
+        ">
+
+    </div>
+
+  </div>
+</section>
+
+<hr class="full-divider">
+
+<!-- STATS BANNER -->
+<section>
+  <div class="stats-banner fade-in">
+    <div class="stat-item"><strong>87M</strong><span>perfiles extraídos por Cambridge Analytica</span></div>
+    <div class="stat-item"><strong>5.9M</strong><span>variaciones de anuncios — campaña Trump 2016</span></div>
+    <div class="stat-item"><strong>52,000+</strong><span>categorías de segmentación en Facebook Ads</span></div>
+    <div class="stat-item"><strong>70</strong><span>países afectados por propaganda computacional</span></div>
+  </div>
+</section>
+
+<hr class="full-divider">
+
+<!<!-- RECURSOS BANCO -->
+<section id="recursos">
+  <div class="section-eyebrow">Banco consolidado ·</div>
+  <h2 class="section-title">Repositorio digital</h2>
+  <p class="section-desc">34 recursos clasificados por tipo. Filtra por categoría para navegar entre contexto, testimonios, conceptual, casos de estudio y archivo.</p>
+
+  <div class="filter-bar">
+    <button class="filter-btn active" onclick="filterResources('all', this)">Todos</button>
+    <button class="filter-btn" onclick="filterResources('CONT', this)">Contexto</button>
+    <button class="filter-btn" onclick="filterResources('TEST', this)">Testimonial</button>
+    <button class="filter-btn" onclick="filterResources('CONC', this)">Conceptual</button>
+    <button class="filter-btn" onclick="filterResources('CAS', this)">Casos</button>
+    <button class="filter-btn" onclick="filterResources('ARC', this)">Archivo</button>
+  </div>
+
+  <div class="resource-grid" id="resourceGrid">
+
+    <!-- CONT 01 -->
+    <div class="resource-card fade-in" data-cat="CONT">
+      <div class="resource-card-img">
+        <img src="https://img.youtube.com/vi/xzoPR_pH9zM/hqdefault.jpg" alt="Voter Targeting CBSN" onerror="this.parentElement.innerHTML='<div class=\'resource-card-img-fallback\' style=\'background:rgba(59,130,246,0.08)\'><i class=\'fab fa-youtube\'></i></div>'">
+      </div>
+      <div class="resource-card-header">
+        <div>
+          <div class="resource-id">INV01 · CONT 01</div>
+          <span class="tag tag-cont">Contexto</span>
+        </div>
+        <div class="resource-type-icon" style="background: rgba(59,130,246,0.1); color: #60a5fa;">
+          <i class="fab fa-youtube"></i>
+        </div>
+      </div>
+      <p class="resource-desc">Entrevista en estudio CBSN entre presentadora y Dan Patterson. Banner <em>'Voter Targeting'</em> visible. Titular: <em>"How campaigns can use data to target voters"</em>.</p>
+      <p class="resource-relation">Muestra cómo las campañas políticas usan big data para microtargetear votantes. Video de 2018 ya anticipaba uso de IA junto al microtargeting.</p>
+      <div class="resource-footer">
+        <span class="resource-year">2018</span>
+        <span class="tag tag-status-avail">Disponible</span>
+        <a href="https://www.youtube.com/watch?v=xzoPR_pH9zM" target="_blank" class="resource-link"><i class="fas fa-external-link-alt"></i> Ver recurso</a>
+      </div>
+    </div>
+
+    <!-- CONT 02 -->
+    <div class="resource-card fade-in" data-cat="CONT">
+      <div class="resource-card-img">
+        <img src="https://i.imgur.com/voter-map-texas.jpg" alt="Mapa de votantes Texas" onerror="this.parentElement.innerHTML='<div class=\'resource-card-img-fallback\' style=\'background:rgba(59,130,246,0.08)\'><i class=\'fas fa-map\'></i></div>'">
+      </div>
+      <div class="resource-card-header">
+        <div>
+          <div class="resource-id">INV01 · CONT 02</div>
+          <span class="tag tag-cont">Contexto</span>
+        </div>
+        <div class="resource-type-icon" style="background: rgba(59,130,246,0.1); color: #60a5fa;">
+          <i class="fas fa-map"></i>
+        </div>
+      </div>
+      <p class="resource-desc">Mapa interactivo de Texas (herramienta L2 VoterMapping): <strong>45.5% Demócrata · 16.75% Independiente · 37.74% Republicano</strong>.</p>
+      <p class="resource-relation">Evidencia visual directa de cómo las campañas segmentan geográficamente a los votantes por filiación política.</p>
+      <div class="resource-footer">
+        <span class="resource-year">2018</span>
+        <span class="tag tag-status-avail">Disponible</span>
+        <a href="https://drive.google.com/drive/folders/1zLbftq41pNkHuRxp4aW2fgzTSOpG4dtn" target="_blank" class="resource-link"><i class="fas fa-external-link-alt"></i> Ver recurso</a>
+      </div>
+    </div>
+
+    <!-- CONT 03 -->
+    <div class="resource-card fade-in" data-cat="CONT">
+      <div class="resource-card-img">
+        <img src="https://i.imgur.com/voter-map-california.jpg" alt="Mapa California con filtros" onerror="this.parentElement.innerHTML='<div class=\'resource-card-img-fallback\' style=\'background:rgba(59,130,246,0.08)\'><i class=\'fas fa-map-marked-alt\'></i></div>'">
+      </div>
+      <div class="resource-card-header">
+        <div>
+          <div class="resource-id">INV01 · CONT 03</div>
+          <span class="tag tag-cont">Contexto</span>
+        </div>
+        <div class="resource-type-icon" style="background: rgba(59,130,246,0.1); color: #60a5fa;">
+          <i class="fas fa-map-marked-alt"></i>
+        </div>
+      </div>
+      <p class="resource-desc">Mapa de California con filtros activos: edad, estado civil, historial de voto, partido político y método de registro.</p>
+      <p class="resource-relation">Demuestra la profundidad del perfilado de votantes combinando múltiples variables demográficas simultáneamente. Variables incluyen veteranos, lugar de nacimiento, geo-TV.</p>
+      <div class="resource-footer">
+        <span class="resource-year">2018</span>
+        <span class="tag tag-status-avail">Disponible</span>
+        <a href="https://drive.google.com/drive/folders/1zLbftq41pNkHuRxp4aW2fgzTSOpG4dtn" target="_blank" class="resource-link"><i class="fas fa-external-link-alt"></i> Ver recurso</a>
+      </div>
+    </div>
+
+    <!-- CONT 04 -->
+    <div class="resource-card fade-in" data-cat="CONT">
+      <div class="resource-card-img">
+        <img src="https://i.guim.co.uk/img/media/374689e354ba90e0a5b29f03b50ef9e81d7e3c8/0_109_3279_1966/master/3279.jpg?width=700&quality=85&auto=format&fit=crop" alt="Cambridge Analytica Facebook escándalo" onerror="this.parentElement.innerHTML='<div class=\'resource-card-img-fallback\' style=\'background:rgba(224,76,47,0.08)\'><i class=\'fas fa-chart-pie\'></i></div>'">
+      </div>
+      <div class="resource-card-header">
+        <div>
+          <div class="resource-id">INV01 · CONT 04</div>
+          <span class="tag tag-cont">Contexto</span>
+        </div>
+        <div class="resource-type-icon" style="background: rgba(224,76,47,0.1); color: #fb923c;">
+          <i class="fas fa-chart-pie"></i>
+        </div>
+      </div>
+      <p class="resource-desc">Gráfico animado de NBC News mostrando logos de Cambridge Analytica y Facebook. Texto: <em>"Gather Personal Information"</em>. Titular: <em>"Facebook loses billions over profile harvesting scandal"</em>.</p>
+      <p class="resource-relation">Documenta el escándalo de recolección masiva de datos sin consentimiento y las consecuencias financieras para Facebook.</p>
+      <div class="resource-footer">
+        <span class="resource-year">2018</span>
+        <span class="tag tag-status-avail">Disponible</span>
+        <a href="https://drive.google.com/drive/folders/1zLbftq41pNkHuRxp4aW2fgzTSOpG4dtn" target="_blank" class="resource-link"><i class="fas fa-external-link-alt"></i> Ver recurso</a>
+      </div>
+    </div>
+
+    <!-- CONT 05 -->
+    <div class="resource-card fade-in" data-cat="CONT">
+      <div class="resource-card-img">
+        <img src="https://news.newpalmedia.com/wp-content/uploads/sites/6/2018/03/cambridge-analytica-scandal-facebook-logo.jpg" alt="Cambridge Analytica múltiples plataformas" onerror="this.parentElement.innerHTML='<div class=\'resource-card-img-fallback\' style=\'background:rgba(224,76,47,0.08)\'><i class=\'fas fa-photo-video\'></i></div>'">
+      </div>
+      <div class="resource-card-header">
+        <div>
+          <div class="resource-id">INV01 · CONT 05</div>
+          <span class="tag tag-cont">Contexto</span>
+        </div>
+        <div class="resource-type-icon" style="background: rgba(224,76,47,0.1); color: #fb923c;">
+          <i class="fas fa-photo-video"></i>
+        </div>
+      </div>
+      <p class="resource-desc">Captura de NBC News con logos de Instagram, Twitter y Facebook. Titular: <em>"Hidden camera shows data firm pitching deceptive tactics"</em>.</p>
+      <p class="resource-relation">Evidencia que el escándalo de datos abarcó múltiples plataformas más allá de Facebook. Subtítulo menciona "new calls for more regulation".</p>
+      <div class="resource-footer">
+        <span class="resource-year">2018</span>
+        <span class="tag tag-status-avail">Disponible</span>
+        <a href="https://drive.google.com/drive/folders/1zLbftq41pNkHuRxp4aW2fgzTSOpG4dtn" target="_blank" class="resource-link"><i class="fas fa-external-link-alt"></i> Ver recurso</a>
+      </div>
+    </div>
+
+    <!-- CONT 06 -->
+    <div class="resource-card fade-in" data-cat="CONT">
+      <div class="resource-card-img">
+        <img src="https://i.guim.co.uk/img/media/374689e354ba90e0a5b29f03b50ef9e81d7e3c8/0_109_3279_1966/master/3279.jpg?width=700&quality=85&auto=format&fit=crop" alt="Edificio Cambridge Analytica" onerror="this.parentElement.innerHTML='<div class=\'resource-card-img-fallback\' style=\'background:rgba(224,76,47,0.08)\'><i class=\'fas fa-image\'></i></div>'">
+      </div>
+      <div class="resource-card-header">
+        <div>
+          <div class="resource-id">INV01 · CONT 06</div>
+          <span class="tag tag-cont">Contexto</span>
+        </div>
+        <div class="resource-type-icon" style="background: rgba(224,76,47,0.1); color: #fb923c;">
+          <i class="fas fa-image"></i>
+        </div>
+      </div>
+      <p class="resource-desc">Foto del edificio físico de Cambridge Analytica con logo tachado por señal de prohibición. Titular: <em>"Instagram banned Cambridge Analytica"</em>.</p>
+      <p class="resource-relation">Documenta las consecuencias institucionales: baneo de la empresa y cierre de operaciones. Buen cierre narrativo — fue una empresa real con consecuencias reales.</p>
+      <div class="resource-footer">
+        <span class="resource-year">2018</span>
+        <span class="tag tag-status-avail">Disponible</span>
+        <a href="https://drive.google.com/drive/folders/1zLbftq41pNkHuRxp4aW2fgzTSOpG4dtn" target="_blank" class="resource-link"><i class="fas fa-external-link-alt"></i> Ver recurso</a>
+      </div>
+    </div>
+
+    <!-- CONT 07 -->
+    <div class="resource-card fade-in" data-cat="CONT">
+      <div class="resource-card-img">
+        <img src="https://www.pewresearch.org/wp-content/uploads/sites/8/2021/01/ST_21.01.12_social-media-news_feature.jpg" alt="Pew Research social media news" onerror="this.parentElement.innerHTML='<div class=\'resource-card-img-fallback\' style=\'background:rgba(59,130,246,0.08)\'><i class=\'fas fa-globe\'></i></div>'">
+      </div>
+      <div class="resource-card-header">
+        <div>
+          <div class="resource-id">INV01 · CONT 07</div>
+          <span class="tag tag-cont">Contexto</span>
+        </div>
+        <div class="resource-type-icon" style="background: rgba(59,130,246,0.1); color: #60a5fa;">
+          <i class="fas fa-globe"></i>
+        </div>
+      </div>
+      <p class="resource-desc">Estadísticas de Pew Research Center: % de adultos en EE.UU. que usan Facebook, Instagram y TikTok como fuente de información política.</p>
+      <p class="resource-relation">Contextualiza el alcance de las plataformas donde se aplica el microtargeting presidencial con datos verificables. Pew actualiza el dato anualmente.</p>
+      <div class="resource-footer">
+        <span class="resource-year">2024</span>
+        <span class="tag tag-status-pend">Por capturar</span>
+        <a href="https://www.pewresearch.org/journalism/fact-sheet/social-media-and-news-fact-sheet/" target="_blank" class="resource-link"><i class="fas fa-external-link-alt"></i> Ver recurso</a>
+      </div>
+    </div>
+
+    <!-- CONT 08 -->
+    <div class="resource-card fade-in" data-cat="CONT">
+      <div class="resource-card-img">
+        <img src="https://storage.googleapis.com/transparencyreport/political-ads/images/og_image.png" alt="Google Transparency Report" onerror="this.parentElement.innerHTML='<div class=\'resource-card-img-fallback\' style=\'background:rgba(59,130,246,0.08)\'><i class=\'fas fa-chart-bar\'></i></div>'">
+      </div>
+      <div class="resource-card-header">
+        <div>
+          <div class="resource-id">INV01 · CONT 08</div>
+          <span class="tag tag-cont">Contexto</span>
+        </div>
+        <div class="resource-type-icon" style="background: rgba(59,130,246,0.1); color: #60a5fa;">
+          <i class="fas fa-chart-bar"></i>
+        </div>
+      </div>
+      <p class="resource-desc">Google Transparency Report: gasto en publicidad política digital por Trump y Biden durante el ciclo electoral 2020, con desglose por estado.</p>
+      <p class="resource-relation">Evidencia el volumen de inversión en publicidad digital segmentada por parte de campañas presidenciales reales.</p>
+      <div class="resource-footer">
+        <span class="resource-year">2020</span>
+        <span class="tag tag-status-pend">Por capturar</span>
+        <a href="https://transparencyreport.google.com/political-ads/region/US" target="_blank" class="resource-link"><i class="fas fa-external-link-alt"></i> Ver recurso</a>
+      </div>
+    </div>
+
+    <!-- TEST 01 -->
+    <div class="resource-card fade-in" data-cat="TEST">
+      <div class="resource-card-img">
+        <img src="https://img.youtube.com/vi/FXdYSQ6nu-M/hqdefault.jpg" alt="Christopher Wylie" onerror="this.parentElement.innerHTML='<div class=\'resource-card-img-fallback\' style=\'background:rgba(20,184,166,0.08)\'><i class=\'fab fa-youtube\'></i></div>'">
+      </div>
+      <div class="resource-card-header">
+        <div>
+          <div class="resource-id">INV01 · TEST 01</div>
+          <span class="tag tag-test">Testimonial</span>
+        </div>
+        <div class="resource-type-icon" style="background: rgba(20,184,166,0.1); color: #2dd4bf;">
+          <i class="fab fa-youtube"></i>
+        </div>
+      </div>
+      <p class="resource-desc"><strong>Christopher Wylie</strong>, exempleado y denunciante de Cambridge Analytica, explicó cómo la empresa construyó perfiles psicológicos de millones de votantes para influir en la campaña de Trump 2016.</p>
+      <p class="resource-relation">Voz directa de alguien que diseñó y aplicó microtargeting. Su libro <em>"Mindf*ck"</em> (2019) también es fuente clave.</p>
+      <div class="resource-footer">
+        <span class="resource-year">2018</span>
+        <span class="tag tag-status-avail">Disponible</span>
+        <a href="https://www.youtube.com/watch?v=FXdYSQ6nu-M" target="_blank" class="resource-link"><i class="fas fa-external-link-alt"></i> Ver recurso</a>
+      </div>
+    </div>
+
+    <!-- TEST 02 -->
+    <div class="resource-card fade-in" data-cat="TEST">
+      <div class="resource-card-img">
+        <img src="https://assets1.cbsnewsstatic.com/hub/i/r/2017/10/08/3a1024a1-41d0-4bb1-acee-09d9cbb7eefb/thumbnail/1280x720/e09c1e5e56fbe96ad64d0d78c2fdc7ef/cbsn-fusion-trump-campaign-digital-director-brad-parscale-thumbnail-1390009-640x360.jpg" alt="Brad Parscale CBS News" onerror="this.parentElement.innerHTML='<div class=\'resource-card-img-fallback\' style=\'background:rgba(20,184,166,0.08)\'><i class=\'fab fa-youtube\'></i></div>'">
+      </div>
+      <div class="resource-card-header">
+        <div>
+          <div class="resource-id">INV01 · TEST 02</div>
+          <span class="tag tag-test">Testimonial</span>
+        </div>
+        <div class="resource-type-icon" style="background: rgba(20,184,166,0.1); color: #2dd4bf;">
+          <i class="fab fa-youtube"></i>
+        </div>
+      </div>
+      <p class="resource-desc"><strong>Brad Parscale</strong>, director digital de Trump 2016, declaró que Facebook fue la columna vertebral de su estrategia con más de <strong>5.9 millones</strong> de variaciones de anuncios.</p>
+      <p class="resource-relation">Testimonio del estratega que aplicó microtargeting presidencial a mayor escala en la historia electoral de EE.UU.</p>
+      <div class="resource-footer">
+        <span class="resource-year">2017</span>
+        <span class="tag tag-status-avail">Disponible</span>
+        <a href="https://www.cbsnews.com/news/parscale-tv-news-thought-i-was-a-joke/" target="_blank" class="resource-link"><i class="fas fa-external-link-alt"></i> Ver recurso</a>
+      </div>
+    </div>
+
+    <!-- TEST 03 -->
+    <div class="resource-card fade-in" data-cat="TEST">
+      <div class="resource-card-img">
+        <img src="https://img.youtube.com/vi/iX8GxLP1FHo/hqdefault.jpg" alt="The Great Hack Brittany Kaiser" onerror="this.parentElement.innerHTML='<div class=\'resource-card-img-fallback\' style=\'background:rgba(20,184,166,0.08)\'><i class=\'fas fa-film\'></i></div>'">
+      </div>
+      <div class="resource-card-header">
+        <div>
+          <div class="resource-id">INV01 · TEST 03</div>
+          <span class="tag tag-test">Testimonial</span>
+        </div>
+        <div class="resource-type-icon" style="background: rgba(20,184,166,0.1); color: #2dd4bf;">
+          <i class="fas fa-film"></i>
+        </div>
+      </div>
+      <p class="resource-desc"><strong>Brittany Kaiser</strong>, exempleada de Cambridge Analytica y autora de <em>"Targeted"</em>, describió cómo se usaron datos de Facebook para explotar miedos de votantes indecisos en estados clave.</p>
+      <p class="resource-relation">Documental <em>The Great Hack</em> (Netflix, 2019). Voz crítica sobre consecuencias éticas del microtargeting presidencial.</p>
+      <div class="resource-footer">
+        <span class="resource-year">2019</span>
+        <span class="tag tag-status-avail">Disponible</span>
+        <a href="https://www.netflix.com/sv/title/80117542" target="_blank" class="resource-link"><i class="fas fa-external-link-alt"></i> Ver recurso</a>
+      </div>
+    </div>
+
+    <!-- TEST 04 -->
+    <div class="resource-card fade-in" data-cat="TEST">
+      <div class="resource-card-img">
+        <img src="https://img.youtube.com/vi/OjPYmEZxACM/hqdefault.jpg" alt="Roger McNamee TED Talk" onerror="this.parentElement.innerHTML='<div class=\'resource-card-img-fallback\' style=\'background:rgba(20,184,166,0.08)\'><i class=\'fas fa-video\'></i></div>'">
+      </div>
+      <div class="resource-card-header">
+        <div>
+          <div class="resource-id">INV01 · TEST 04</div>
+          <span class="tag tag-test">Testimonial</span>
+        </div>
+        <div class="resource-type-icon" style="background: rgba(20,184,166,0.1); color: #2dd4bf;">
+          <i class="fas fa-video"></i>
+        </div>
+      </div>
+      <p class="resource-desc"><strong>Roger McNamee</strong>, inversor de Facebook y autor de <em>"Zucked"</em> (2019), declaró en CNN y BBC cómo las herramientas publicitarias de Facebook fueron diseñadas para permitir la segmentación política extrema.</p>
+      <p class="resource-relation">Perspectiva desde Silicon Valley sobre la responsabilidad de las plataformas. TED Talk disponible en YouTube.</p>
+      <div class="resource-footer">
+        <span class="resource-year">2019</span>
+        <span class="tag tag-status-avail">Disponible</span>
+        <a href="https://www.youtube.com/watch?v=OjPYmEZxACM" target="_blank" class="resource-link"><i class="fas fa-external-link-alt"></i> Ver recurso</a>
+      </div>
+    </div>
+
+    <!-- TEST 05 -->
+    <div class="resource-card fade-in" data-cat="TEST">
+      <div class="resource-card-img">
+        <img src="https://pi.tedcdn.com/r/pe.tedcdn.com/images/ted/f3a89c3b0e2a47b28f9f1b62a5e2f28a5f0dba0f_2880x1620.jpg?quality=89&w=800" alt="Carole Cadwalladr TED Talk" onerror="this.parentElement.innerHTML='<div class=\'resource-card-img-fallback\' style=\'background:rgba(20,184,166,0.08)\'><i class=\'fas fa-microphone\'></i></div>'">
+      </div>
+      <div class="resource-card-header">
+        <div>
+          <div class="resource-id">INV01 · TEST 05</div>
+          <span class="tag tag-test">Testimonial</span>
+        </div>
+        <div class="resource-type-icon" style="background: rgba(20,184,166,0.1); color: #2dd4bf;">
+          <i class="fas fa-microphone"></i>
+        </div>
+      </div>
+      <p class="resource-desc"><strong>Carole Cadwalladr</strong>, periodista de The Guardian, expuso en su TED Talk 2019 cómo el microtargeting alteró procesos democráticos en Reino Unido y EE.UU. durante el Brexit y las elecciones de 2016.</p>
+      <p class="resource-relation">+3 millones de vistas. Cadwalladr ganó el Premio Orwell por su investigación. Fuente altamente citada académicamente.</p>
+      <div class="resource-footer">
+        <span class="resource-year">2019</span>
+        <span class="tag tag-status-avail">Disponible</span>
+        <a href="https://www.ted.com/talks/carole_cadwalladr_facebook_s_role_in_brexit_and_the_threat_to_democracy" target="_blank" class="resource-link"><i class="fas fa-external-link-alt"></i> Ver recurso</a>
+      </div>
+    </div>
+
+    <!-- CONC 01 -->
+    <div class="resource-card fade-in" data-cat="CONC">
+      <div class="resource-card-img">
+        <img src="https://www.eff.org/files/banner_library/fbook-brokers.png" alt="EFF infografía segmentación Facebook" onerror="this.parentElement.innerHTML='<div class=\'resource-card-img-fallback\' style=\'background:rgba(139,92,246,0.08)\'><i class=\'fas fa-globe\'></i></div>'">
+      </div>
+      <div class="resource-card-header">
+        <div>
+          <div class="resource-id">INV01 · CONC 01</div>
+          <span class="tag tag-conc">Conceptual</span>
+        </div>
+        <div class="resource-type-icon" style="background: rgba(139,92,246,0.1); color: #a78bfa;">
+          <i class="fas fa-globe"></i>
+        </div>
+      </div>
+      <p class="resource-desc">Infografía EFF: modelo de segmentación publicitaria de Facebook — audiencias personalizadas, lookalike audiences y targeting por comportamiento político.</p>
+      <p class="resource-relation">Explica los mecanismos técnicos exactos que las campañas presidenciales usan para implementar el microtargeting en Facebook. ONG especializada en derechos digitales.</p>
+      <div class="resource-footer">
+        <span class="resource-year">2018</span>
+        <span class="tag tag-status-avail">Disponible</span>
+        <a href="https://www.eff.org/deeplinks/2018/04/facebook-isnt-telling-whole-story-about-its-decision-stop-partnering-data-brokers" target="_blank" class="resource-link"><i class="fas fa-external-link-alt"></i> Ver recurso</a>
+      </div>
+    </div>
+
+    <!-- CONC 02 -->
+    <div class="resource-card fade-in" data-cat="CONC">
+      <div class="resource-card-img">
+        <img src="https://img.youtube.com/vi/iX8GxLP1FHo/hqdefault.jpg" alt="Modelo OCEAN The Great Hack" onerror="this.parentElement.innerHTML='<div class=\'resource-card-img-fallback\' style=\'background:rgba(139,92,246,0.08)\'><i class=\'fas fa-brain\'></i></div>'">
+      </div>
+      <div class="resource-card-header">
+        <div>
+          <div class="resource-id">INV01 · CONC 02</div>
+          <span class="tag tag-conc">Conceptual</span>
+        </div>
+        <div class="resource-type-icon" style="background: rgba(139,92,246,0.1); color: #a78bfa;">
+          <i class="fas fa-brain"></i>
+        </div>
+      </div>
+      <p class="resource-desc">Esquema del modelo <strong>OCEAN</strong> (Openness, Conscientiousness, Extraversion, Agreeableness, Neuroticism) utilizado por Cambridge Analytica para construir perfiles psicológicos de votantes.</p>
+      <p class="resource-relation">Núcleo metodológico del microtargeting: segmentación psicográfica que va más allá de datos demográficos. The Great Hack, min 18:30.</p>
+      <div class="resource-footer">
+        <span class="resource-year">2019</span>
+        <span class="tag tag-status-avail">Disponible</span>
+        <a href="https://www.netflix.com/sv/title/80117542" target="_blank" class="resource-link"><i class="fas fa-external-link-alt"></i> Ver recurso</a>
+      </div>
+    </div>
+
+    <!-- CONC 03 -->
+    <div class="resource-card fade-in" data-cat="CONC">
+      <div class="resource-card-img">
+        <img src="https://www.propublica.org/images/ngen/gypsy_image_630/20161028-facebook-ad-categories-630x420.jpg" alt="ProPublica Facebook 52000 categorías" onerror="this.parentElement.innerHTML='<div class=\'resource-card-img-fallback\' style=\'background:rgba(139,92,246,0.08)\'><i class=\'fas fa-chart-bar\'></i></div>'">
+      </div>
+      <div class="resource-card-header">
+        <div>
+          <div class="resource-id">INV01 · CONC 03</div>
+          <span class="tag tag-conc">Conceptual</span>
+        </div>
+        <div class="resource-type-icon" style="background: rgba(139,92,246,0.1); color: #a78bfa;">
+          <i class="fas fa-chart-bar"></i>
+        </div>
+      </div>
+      <p class="resource-desc">Gráfico de ProPublica: más de <strong>52,000 categorías de interés</strong> disponibles en Facebook Ads Manager, incluyendo categorías sensibles como "very liberal" o "very conservative".</p>
+      <p class="resource-relation">Documenta la escala real de segmentación disponible. Datos obtenidos directamente del Ads Manager de Facebook.</p>
+      <div class="resource-footer">
+        <span class="resource-year">2017</span>
+        <span class="tag tag-status-avail">Disponible</span>
+        <a href="https://www.propublica.org/article/facebook-lets-advertisers-exclude-users-by-race" target="_blank" class="resource-link"><i class="fas fa-external-link-alt"></i> Ver recurso</a>
+      </div>
+    </div>
+
+    <!-- CONC 04 -->
+    <div class="resource-card fade-in" data-cat="CONC">
+      <div class="resource-card-img">
+        <img src="https://img.youtube.com/vi/n8Dd5aVXLCc/hqdefault.jpg" alt="Video microtargeting proceso completo" onerror="this.parentElement.innerHTML='<div class=\'resource-card-img-fallback\' style=\'background:rgba(139,92,246,0.08)\'><i class=\'fab fa-youtube\'></i></div>'">
+      </div>
+      <div class="resource-card-header">
+        <div>
+          <div class="resource-id">INV01 · CONC 04</div>
+          <span class="tag tag-conc">Conceptual</span>
+        </div>
+        <div class="resource-type-icon" style="background: rgba(139,92,246,0.1); color: #a78bfa;">
+          <i class="fab fa-youtube"></i>
+        </div>
+      </div>
+      <p class="resource-desc">Video explicativo del proceso completo del microtargeting: recolección de datos → análisis psicográfico → segmentación → diseño de mensajes → distribución → medición de impacto.</p>
+      <p class="resource-relation">Pieza explicativa central del producto audiovisual. Sintetiza las fuentes primarias y orienta al espectador en el proceso completo.</p>
+      <div class="resource-footer">
+        <span class="resource-year">2024</span>
+        <span class="tag tag-status-avail">Disponible</span>
+        <a href="https://www.youtube.com/watch?v=n8Dd5aVXLCc" target="_blank" class="resource-link"><i class="fas fa-external-link-alt"></i> Ver recurso</a>
+      </div>
+    </div>
+
+    <!-- CONC 05 -->
+    <div class="resource-card fade-in" data-cat="CONC">
+      <div class="resource-card-img">
+        <img src="https://www.europarl.europa.eu/resources/library/images/20230220PHT76113/20230220PHT76113_original.jpg" alt="EU regulación publicidad política" onerror="this.parentElement.innerHTML='<div class=\'resource-card-img-fallback\' style=\'background:rgba(139,92,246,0.08)\'><i class=\'fas fa-balance-scale\'></i></div>'">
+      </div>
+      <div class="resource-card-header">
+        <div>
+          <div class="resource-id">INV01 · CONC 05</div>
+          <span class="tag tag-conc">Conceptual</span>
+        </div>
+        <div class="resource-type-icon" style="background: rgba(139,92,246,0.1); color: #a78bfa;">
+          <i class="fas fa-balance-scale"></i>
+        </div>
+      </div>
+      <p class="resource-desc">Tabla comparativa de regulaciones: Unión Europea (RGPD), Reino Unido (post-Brexit), EE.UU. (sin regulación federal específica) — con énfasis en vacíos legales que permiten el microtargeting.</p>
+      <p class="resource-relation">El Parlamento Europeo aprobó en 2022 regulación específica sobre publicidad política digital. Contraste claro con la falta de legislación en EE.UU.</p>
+      <div class="resource-footer">
+        <span class="resource-year">2022</span>
+        <span class="tag tag-status-avail">Disponible</span>
+        <a href="https://www.europarl.europa.eu/topics/en/article/20230202STO71504/why-new-eu-rules-for-political-advertising-are-important" target="_blank" class="resource-link"><i class="fas fa-external-link-alt"></i> Ver recurso</a>
+      </div>
+    </div>
+
+    <!-- CAS 01 -->
+    <div class="resource-card fade-in" data-cat="CAS">
+      <div class="resource-card-img">
+        <img src="https://assets.bwbx.io/images/users/iqjWHBFdfxIU/iOSg.9OTzrJw/v1/1200x-1.jpg" alt="Bloomberg Trump bunker dark posts" onerror="this.parentElement.innerHTML='<div class=\'resource-card-img-fallback\' style=\'background:rgba(245,166,35,0.08)\'><i class=\'fas fa-newspaper\'></i></div>'">
+      </div>
+      <div class="resource-card-header">
+        <div>
+          <div class="resource-id">INV01 · CAS 01</div>
+          <span class="tag tag-cas">Caso</span>
+        </div>
+        <div class="resource-type-icon" style="background: rgba(245,166,35,0.1); color: #fbbf24;">
+          <i class="fas fa-newspaper"></i>
+        </div>
+      </div>
+      <p class="resource-desc"><strong>Bloomberg Businessweek (2016)</strong>: La campaña de Trump usó <em>"dark posts"</em> en Facebook para desalentar el voto de tres grupos: afroamericanos idealistas, jóvenes demócratas y mujeres blancas suburbanas en estados clave.</p>
+      <p class="resource-relation">Caso central del microtargeting de supresión de voto. Artículo referencia clave en estudios de comunicación política digital.</p>
+      <div class="resource-footer">
+        <span class="resource-year">2016</span>
+        <span class="tag tag-status-avail">Disponible</span>
+        <a href="https://www.bloomberg.com/news/articles/2016-10-27/inside-the-trump-bunker-with-12-days-to-go" target="_blank" class="resource-link"><i class="fas fa-external-link-alt"></i> Ver recurso</a>
+      </div>
+    </div>
+
+    <!-- CAS 02 -->
+    <div class="resource-card fade-in" data-cat="CAS">
+      <div class="resource-card-img">
+        <img src="https://hbr.org/resources/images/article_assets/2012/11/R1211F_DAVENPORT.png" alt="Obama Project Narwhal HBR" onerror="this.parentElement.innerHTML='<div class=\'resource-card-img-fallback\' style=\'background:rgba(245,166,35,0.08)\'><i class=\'fas fa-graduation-cap\'></i></div>'">
+      </div>
+      <div class="resource-card-header">
+        <div>
+          <div class="resource-id">INV01 · CAS 02</div>
+          <span class="tag tag-cas">Caso</span>
+        </div>
+        <div class="resource-type-icon" style="background: rgba(245,166,35,0.1); color: #fbbf24;">
+          <i class="fas fa-graduation-cap"></i>
+        </div>
+      </div>
+      <p class="resource-desc"><strong>Harvard Business Review (2012)</strong>: <em>"Project Narwhal"</em> de Obama integró 18 bases de datos distintas para segmentar mensajes personalizados a votantes indecisos en Ohio y Virginia.</p>
+      <p class="resource-relation">Primer caso documentado de microtargeting presidencial a escala masiva. Precursor directo de las técnicas actuales de segmentación psicográfica.</p>
+      <div class="resource-footer">
+        <span class="resource-year">2012</span>
+        <span class="tag tag-status-avail">Disponible</span>
+        <a href="https://hbr.org/2012/11/the-analytics-lesson-from-the" target="_blank" class="resource-link"><i class="fas fa-external-link-alt"></i> Ver recurso</a>
+      </div>
+    </div>
+
+    <!-- CAS 03 -->
+    <div class="resource-card fade-in" data-cat="CAS">
+      <div class="resource-card-img">
+        <img src="https://i.guim.co.uk/img/static/sys-images/Guardian/Pix/pictures/2015/12/11/1449844366326/Ted-Cruz-001.jpg?width=700&quality=85&auto=format&fit=max" alt="Ted Cruz Cambridge Analytica The Guardian" onerror="this.parentElement.innerHTML='<div class=\'resource-card-img-fallback\' style=\'background:rgba(245,166,35,0.08)\'><i class=\'fas fa-newspaper\'></i></div>'">
+      </div>
+      <div class="resource-card-header">
+        <div>
+          <div class="resource-id">INV01 · CAS 03</div>
+          <span class="tag tag-cas">Caso</span>
+        </div>
+        <div class="resource-type-icon" style="background: rgba(245,166,35,0.1); color: #fbbf24;">
+          <i class="fas fa-newspaper"></i>
+        </div>
+      </div>
+      <p class="resource-desc"><strong>The Guardian (2015)</strong>: La campaña de Ted Cruz fue el primer uso del modelo OCEAN de Cambridge Analytica, aplicado sobre 230 millones de perfiles extraídos de Facebook. Contrato de $750,000.</p>
+      <p class="resource-relation">Primer uso documentado del modelo OCEAN en campaña presidencial estadounidense. Genealogía del escándalo Cambridge Analytica antes de Trump.</p>
+      <div class="resource-footer">
+        <span class="resource-year">2015</span>
+        <span class="tag tag-status-avail">Disponible</span>
+        <a href="https://www.theguardian.com/us-news/2015/dec/11/senator-ted-cruz-president-campaign-facebook-user-data" target="_blank" class="resource-link"><i class="fas fa-external-link-alt"></i> Ver recurso</a>
+      </div>
+    </div>
+
+    <!-- CAS 04 -->
+    <div class="resource-card fade-in" data-cat="CAS">
+      <div class="resource-card-img">
+        <img src="https://wp.technologyreview.com/wp-content/uploads/2020/09/politicalads-2.jpg" alt="Biden 2020 digital campaign MIT" onerror="this.parentElement.innerHTML='<div class=\'resource-card-img-fallback\' style=\'background:rgba(245,166,35,0.08)\'><i class=\'fas fa-newspaper\'></i></div>'">
+      </div>
+      <div class="resource-card-header">
+        <div>
+          <div class="resource-id">INV01 · CAS 04</div>
+          <span class="tag tag-cas">Caso</span>
+        </div>
+        <div class="resource-type-icon" style="background: rgba(245,166,35,0.1); color: #fbbf24;">
+          <i class="fas fa-newspaper"></i>
+        </div>
+      </div>
+      <p class="resource-desc"><strong>MIT Technology Review (2020)</strong>: Campaña de Biden en Pensilvania, Wisconsin y Michigan con mensajes diferenciados sobre COVID-19, economía y democracia. Inversión de más de $280M en publicidad digital.</p>
+      <p class="resource-relation">Caso contemporáneo de microtargeting presidencial adaptado al contexto pandémico. Facebook, Instagram y YouTube como plataformas principales.</p>
+      <div class="resource-footer">
+        <span class="resource-year">2020</span>
+        <span class="tag tag-status-avail">Disponible</span>
+        <a href="https://www.technologyreview.com/2020/09/28/1008994/the-technology-that-powers-political-campaigns-in-2020-explained/" target="_blank" class="resource-link"><i class="fas fa-external-link-alt"></i> Ver recurso</a>
+      </div>
+    </div>
+
+    <!-- CAS 05 -->
+    <div class="resource-card fade-in" data-cat="CAS">
+      <div class="resource-card-img">
+        <img src="https://cfr.brightspotcdn.com/dims4/default/7c70b9d/2147483647/strip/true/crop/800x450+0+0/resize/800x450!/quality/90/?url=https%3A%2F%2Fstatic.cfr.org%2Fuploads%2F2018%2F10%2FBolsonaro-1.jpg" alt="Bolsonaro WhatsApp Brasil" onerror="this.parentElement.innerHTML='<div class=\'resource-card-img-fallback\' style=\'background:rgba(245,166,35,0.08)\'><i class=\'fas fa-globe-americas\'></i></div>'">
+      </div>
+      <div class="resource-card-header">
+        <div>
+          <div class="resource-id">INV01 · CAS 05</div>
+          <span class="tag tag-cas">Caso</span>
+        </div>
+        <div class="resource-type-icon" style="background: rgba(245,166,35,0.1); color: #fbbf24;">
+          <i class="fas fa-globe-americas"></i>
+        </div>
+      </div>
+      <p class="resource-desc"><strong>NYT — Brasil 2018</strong>: Campaña de Bolsonaro usó WhatsApp Business para distribuir millones de mensajes políticos personalizados y desinformación segmentada. Caso de microtargeting en América Latina.</p>
+      <p class="resource-relation">Demuestra que el fenómeno va más allá de EE.UU. WhatsApp tiene alta penetración en la región. Relevante para contextualizar en América Latina.</p>
+      <div class="resource-footer">
+        <span class="resource-year">2018</span>
+        <span class="tag tag-status-avail">Disponible</span>
+        <a href="https://www.cfr.org/articles/whatsapps-influence-brazilian-election-and-how-it-helped-jair-bolsonaro-win" target="_blank" class="resource-link"><i class="fas fa-external-link-alt"></i> Ver recurso</a>
+      </div>
+    </div>
+
+    <!-- CAS 06 -->
+    <div class="resource-card fade-in" data-cat="CAS">
+      <div class="resource-card-img">
+        <img src="https://media-cldnry.s-nbcnews.com/image/upload/t_fit-760w,f_auto,q_auto:best/rockcms/2024-08/trump-adin-ross-tiktok-mc-240814-02-c91c14.jpg" alt="Trump TikTok Adin Ross 2024" onerror="this.parentElement.innerHTML='<div class=\'resource-card-img-fallback\' style=\'background:rgba(245,166,35,0.08)\'><i class=\'fab fa-tiktok\'></i></div>'">
+      </div>
+      <div class="resource-card-header">
+        <div>
+          <div class="resource-id">INV01 · CAS 06</div>
+          <span class="tag tag-cas">Caso</span>
+        </div>
+        <div class="resource-type-icon" style="background: rgba(245,166,35,0.1); color: #fbbf24;">
+          <i class="fab fa-tiktok"></i>
+        </div>
+      </div>
+      <p class="resource-desc"><strong>Trump 2024 en TikTok</strong>: Colaboraciones con Logan Paul y Adin Ross. Contenido adaptado a votantes de 18-34 años. Trump acumuló más de <strong>14 millones</strong> de seguidores durante la campaña.</p>
+      <p class="resource-relation">Caso reciente en TikTok. Ilustra cómo el microtargeting evolucionó hacia el video corto y la colaboración con influencers como vectores de segmentación.</p>
+      <div class="resource-footer">
+        <span class="resource-year">2024</span>
+        <span class="tag tag-status-avail">Disponible</span>
+        <a href="https://www.nbcnews.com/tech/internet/adin-ross-interviews-trump-gifts-cybertruck-rolex-rcna165225" target="_blank" class="resource-link"><i class="fas fa-external-link-alt"></i> Ver recurso</a>
+      </div>
+    </div>
+
+    <!-- CAS 07 -->
+    <div class="resource-card fade-in" data-cat="CAS">
+      <div class="resource-card-img">
+        <img src="https://img.youtube.com/vi/ZIblFBBEuAw/hqdefault.jpg" alt="Obama 2008 Facebook Journal" onerror="this.parentElement.innerHTML='<div class=\'resource-card-img-fallback\' style=\'background:rgba(245,166,35,0.08)\'><i class=\'fas fa-graduation-cap\'></i></div>'">
+      </div>
+      <div class="resource-card-header">
+        <div>
+          <div class="resource-id">INV01 · CAS 07</div>
+          <span class="tag tag-cas">Caso</span>
+        </div>
+        <div class="resource-type-icon" style="background: rgba(245,166,35,0.1); color: #fbbf24;">
+          <i class="fas fa-graduation-cap"></i>
+        </div>
+      </div>
+      <p class="resource-desc"><strong>Obama 2008 — Journal of IT &amp; Politics</strong>: Primer uso estratégico de Facebook para recaudar fondos y movilizar votantes jóvenes. Recaudó <strong>$500M</strong> en línea estableciendo el modelo del microtargeting presidencial moderno.</p>
+      <p class="resource-relation">Origen histórico del microtargeting en redes sociales. Artículo revisado por pares. Permite mostrar la evolución hasta las técnicas psicográficas actuales.</p>
+      <div class="resource-footer">
+        <span class="resource-year">2008</span>
+        <span class="tag tag-status-avail">Disponible</span>
+        <a href="https://www.tandfonline.com/doi/abs/10.1080/19331681.2014.895691" target="_blank" class="resource-link"><i class="fas fa-external-link-alt"></i> Ver recurso</a>
+      </div>
+    </div>
+
+    <!-- CAS 08 -->
+    <div class="resource-card fade-in" data-cat="CAS">
+      <div class="resource-card-img">
+        <img src="https://img.youtube.com/vi/uaaC57tcci0/hqdefault.jpg" alt="The Social Dilemma Netflix" onerror="this.parentElement.innerHTML='<div class=\'resource-card-img-fallback\' style=\'background:rgba(245,166,35,0.08)\'><i class=\'fas fa-film\'></i></div>'">
+      </div>
+      <div class="resource-card-header">
+        <div>
+          <div class="resource-id">INV01 · CAS 08</div>
+          <span class="tag tag-cas">Caso</span>
+        </div>
+        <div class="resource-type-icon" style="background: rgba(245,166,35,0.1); color: #fbbf24;">
+          <i class="fas fa-film"></i>
+        </div>
+      </div>
+      <p class="resource-desc"><strong>The Social Dilemma</strong> (Netflix, 2020): exempleados de Facebook, Google y Twitter explican cómo los algoritmos amplifican contenido político personalizado, creando cámaras de eco.</p>
+      <p class="resource-relation">+15 exempleados de Silicon Valley. Conecta el microtargeting con el diseño deliberado de las plataformas. Complementa The Great Hack.</p>
+      <div class="resource-footer">
+        <span class="resource-year">2020</span>
+        <span class="tag tag-status-avail">Disponible</span>
+        <a href="https://www.netflix.com/sv/title/81254224" target="_blank" class="resource-link"><i class="fas fa-external-link-alt"></i> Ver recurso</a>
+      </div>
+    </div>
+
+    <!-- ARC 01 -->
+    <div class="resource-card fade-in" data-cat="ARC">
+      <div class="resource-card-img">
+        <img src="https://about.fb.com/wp-content/uploads/2018/05/ad-library.png" alt="Meta Ad Library" onerror="this.parentElement.innerHTML='<div class=\'resource-card-img-fallback\' style=\'background:rgba(224,76,47,0.08)\'><i class=\'fab fa-facebook\'></i></div>'">
+      </div>
+      <div class="resource-card-header">
+        <div>
+          <div class="resource-id">INV01 · ARC 01</div>
+          <span class="tag tag-arc">Archivo</span>
+        </div>
+        <div class="resource-type-icon" style="background: rgba(224,76,47,0.1); color: #fb923c;">
+          <i class="fab fa-facebook"></i>
+        </div>
+      </div>
+      <p class="resource-desc"><strong>Meta Ad Library</strong>: todos los anuncios políticos en Facebook e Instagram desde 2018. Gasto estimado, alcance demográfico y segmentación utilizada por campañas presidenciales de EE.UU.</p>
+      <p class="resource-relation">Herramienta oficial de Meta. Permite buscar por candidato, período y audiencia. Imprescindible para verificar microtargeting en tiempo real.</p>
+      <div class="resource-footer">
+        <span class="resource-year">2018–</span>
+        <span class="tag tag-status-avail">Disponible</span>
+        <a href="https://www.facebook.com/ads/library/?active_status=all&ad_type=political_and_issue_ads&country=US" target="_blank" class="resource-link"><i class="fas fa-external-link-alt"></i> Ver recurso</a>
+      </div>
+    </div>
+
+    <!-- ARC 02 -->
+    <div class="resource-card fade-in" data-cat="ARC">
+      <div class="resource-card-img">
+        <img src="https://www.fec.gov/static/base/images/seal_color.svg" alt="FEC Federal Election Commission" onerror="this.parentElement.innerHTML='<div class=\'resource-card-img-fallback\' style=\'background:rgba(224,76,47,0.08)\'><i class=\'fas fa-landmark\'></i></div>'">
+      </div>
+      <div class="resource-card-header">
+        <div>
+          <div class="resource-id">INV01 · ARC 02</div>
+          <span class="tag tag-arc">Archivo</span>
+        </div>
+        <div class="resource-type-icon" style="background: rgba(224,76,47,0.1); color: #fb923c;">
+          <i class="fas fa-landmark"></i>
+        </div>
+      </div>
+      <p class="resource-desc"><strong>FEC (Comisión Federal Electoral)</strong>: registros de gasto en publicidad digital por candidatos presidenciales. Trump y Biden gastaron combinados más de <strong>$300M</strong> en Facebook en 2020.</p>
+      <p class="resource-relation">Fuente gubernamental verificable. Datos abiertos del gobierno de EE.UU. Desglose por plataforma y ciclo electoral desde 2016.</p>
+      <div class="resource-footer">
+        <span class="resource-year">2016–2024</span>
+        <span class="tag tag-status-avail">Disponible</span>
+        <a href="https://www.fec.gov/data/disbursements/?data_type=processed&recipient_name=facebook" target="_blank" class="resource-link"><i class="fas fa-external-link-alt"></i> Ver recurso</a>
+      </div>
+    </div>
+
+    <!-- ARC 06 -->
+    <div class="resource-card fade-in" data-cat="ARC">
+      <div class="resource-card-img">
+        <img src="https://www.intelligence.senate.gov/sites/default/files/styles/report_cover/public/documents/SSCI%20Report%20Vol%202%20Cover.png" alt="Informe Senado EE.UU. IRA" onerror="this.parentElement.innerHTML='<div class=\'resource-card-img-fallback\' style=\'background:rgba(224,76,47,0.08)\'><i class=\'fas fa-file-alt\'></i></div>'">
+      </div>
+      <div class="resource-card-header">
+        <div>
+          <div class="resource-id">INV01 · ARC 06</div>
+          <span class="tag tag-arc">Archivo</span>
+        </div>
+        <div class="resource-type-icon" style="background: rgba(224,76,47,0.1); color: #fb923c;">
+          <i class="fas fa-file-alt"></i>
+        </div>
+      </div>
+      <p class="resource-desc"><strong>Informe del Senado de EE.UU. (2019)</strong>: Volumen 2 sobre el Internet Research Agency ruso. Microtargeting de afroamericanos, latinos y evangélicos en Facebook, Instagram y YouTube, elección 2016.</p>
+      <p class="resource-relation">Informe bipartidista. Evidencia oficial del microtargeting como herramienta de interferencia electoral. Fuente de alto peso académico y político.</p>
+      <div class="resource-footer">
+        <span class="resource-year">2019</span>
+        <span class="tag tag-status-avail">Disponible</span>
+        <a href="https://www.intelligence.senate.gov/sites/default/files/documents/Report_Volume2.pdf" target="_blank" class="resource-link"><i class="fas fa-external-link-alt"></i> Ver recurso</a>
+      </div>
+    </div>
+
+    <!-- ARC 08 -->
+    <div class="resource-card fade-in" data-cat="ARC">
+      <div class="resource-card-img">
+        <img src="https://www.europarl.europa.eu/resources/library/images/20230220PHT76113/20230220PHT76113_original.jpg" alt="Parlamento Europeo reglamento 2023" onerror="this.parentElement.innerHTML='<div class=\'resource-card-img-fallback\' style=\'background:rgba(224,76,47,0.08)\'><i class=\'fas fa-balance-scale\'></i></div>'">
+      </div>
+      <div class="resource-card-header">
+        <div>
+          <div class="resource-id">INV01 · ARC 08</div>
+          <span class="tag tag-arc">Archivo</span>
+        </div>
+        <div class="resource-type-icon" style="background: rgba(224,76,47,0.1); color: #fb923c;">
+          <i class="fas fa-balance-scale"></i>
+        </div>
+      </div>
+      <p class="resource-desc"><strong>Reglamento del Parlamento Europeo (2023)</strong>: prohíbe el microtargeting basado en datos sensibles —origen étnico, orientación religiosa y política— en campañas electorales.</p>
+      <p class="resource-relation">Marco regulatorio que contrasta con la ausencia de regulación equivalente en EE.UU. Cierre argumentativo del eje regulatorio del tema.</p>
+      <div class="resource-footer">
+        <span class="resource-year">2023</span>
+        <span class="tag tag-status-avail">Disponible</span>
+        <a href="https://www.europarl.europa.eu/doceo/document/TA-9-2024-0090_EN.html" target="_blank" class="resource-link"><i class="fas fa-external-link-alt"></i> Ver recurso</a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<hr class="full-divider">
+
+<!-- ─── ESTILOS ADICIONALES PARA LAS IMÁGENES ─── -->
+<!--
+  Agregar dentro del <style> de tu página (o en tu CSS externo):
+
+  .resource-card-img {
+    width: 100%;
+    height: 160px;
+    overflow: hidden;
+    border-radius: var(--border-radius, 8px) var(--border-radius, 8px) 0 0;
+  }
+  .resource-card-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s ease;
+  }
+  .resource-card:hover .resource-card-img img {
+    transform: scale(1.04);
+  }
+  .resource-card-img-fallback {
+    width: 100%;
+    height: 160px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: #888;
+  }
+-->
+
+<!-- VIDEOS EMBED -->
+<section id="videos">
+  <div class="section-eyebrow">Recursos audiovisuales</div>
+  <h2 class="section-title">Videos clave</h2>
+  <p class="section-desc">Los testimonios y documentales más relevantes de la investigación, disponibles directamente.</p>
+
+  <div class="video-grid">
+
+    <div class="video-card fade-in">
+      <div class="video-thumb">
+        <iframe src="https://www.youtube.com/embed/FXdYSQ6nu-M" title="Christopher Wylie - Cambridge Analytica" allowfullscreen loading="lazy"></iframe>
+      </div>
+      <div class="video-info">
+        <h3>Christopher Wylie — Denunciante de Cambridge Analytica</h3>
+        <p>TEST 01 · 2018 · YouTube · Testimonio directo sobre perfiles psicológicos de votantes</p>
+      </div>
+    </div>
+
+    <div class="video-card fade-in">
+      <div class="video-thumb">
+        <iframe src="https://www.youtube.com/embed/OjPYmEZxACM" title="Roger McNamee - Zucked" allowfullscreen loading="lazy"></iframe>
+      </div>
+      <div class="video-info">
+        <h3>Roger McNamee — "Zucked" (2019)</h3>
+        <p>TEST 04 · 2019 · YouTube · Perspectiva desde Silicon Valley sobre la responsabilidad de Facebook</p>
+      </div>
+    </div>
+
+    <div class="video-card fade-in">
+      <div class="video-thumb">
+        <iframe src="https://www.youtube.com/embed/n8Dd5aVXLCc" title="Microtargeting explicado" allowfullscreen loading="lazy"></iframe>
+      </div>
+      <div class="video-info">
+        <h3>Proceso completo del microtargeting político</h3>
+        <p>CONC 04 · 2024 · YouTube · Pieza explicativa central del documental</p>
+      </div>
+    </div>
+
+    <div class="video-card fade-in">
+      <div class="video-thumb">
+        <a href="https://www.ted.com/talks/carole_cadwalladr_facebook_s_role_in_brexit_and_the_threat_to_democracy" target="_blank" class="video-thumb-placeholder">
+          <div class="video-play-icon"><i class="fas fa-play"></i></div>
+          <span style="font-size: 12px;">Ver en TED.com</span>
+        </a>
+      </div>
+      <div class="video-info">
+        <h3>Carole Cadwalladr — Facebook y el Brexit (TED 2019)</h3>
+        <p>TEST 05 · +3M vistas · Premio Orwell · Consecuencias democráticas del microtargeting</p>
+      </div>
+    </div>
+
+    <div class="video-card fade-in">
+      <div class="video-thumb">
+        <a href="https://www.youtube.com/watch?v=xzoPR_pH9zM" target="_blank" class="video-thumb-placeholder">
+          <div class="video-play-icon"><i class="fas fa-play"></i></div>
+          <span style="font-size: 12px;">Ver en YouTube</span>
+        </a>
+      </div>
+      <div class="video-info">
+        <h3>CBSN — Cómo las campañas usan big data (2018)</h3>
+        <p>CONT 01 · Dan Patterson · Voter Targeting visible en pantalla · Con mapas de Texas y California</p>
+      </div>
+    </div>
+
+    <div class="video-card fade-in">
+      <div class="video-thumb">
+        <a href="https://www.netflix.com/sv/title/80117542" target="_blank" class="video-thumb-placeholder">
+          <div class="video-play-icon"><i class="fas fa-play"></i></div>
+          <span style="font-size: 12px;">Ver en Netflix</span>
+        </a>
+      </div>
+      <div class="video-info">
+        <h3>The Great Hack — Netflix (2019)</h3>
+        <p>TEST 03 + CONC 02 · Brittany Kaiser y el modelo OCEAN · Documental central del proyecto</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<hr class="full-divider">
+
+<!-- TESTIMONIOS -->
+<section id="testimonios">
+  <div class="section-eyebrow">Voces directas · TEST 01–05</div>
+  <h2 class="section-title">Testimonios de insiders</h2>
+  <p class="section-desc">Cinco testimonios de personas que diseñaron, ejecutaron o investigaron el microtargeting presidencial desde adentro.</p>
+
+  <div class="testimony-grid">
+
+    <div class="testimony-card fade-in">
+      <p class="testimony-quote">"Construimos perfiles psicológicos de millones de personas para influir en quién votarían. Sabíamos exactamente qué botones presionar para cada tipo de personalidad."</p>
+      <div class="testimony-source">
+        <div class="testimony-avatar" style="background: rgba(20,184,166,0.15); color: #2dd4bf;">CW</div>
+        <div>
+          <div class="testimony-name">Christopher Wylie</div>
+          <div class="testimony-role">Exempleado y denunciante de Cambridge Analytica · Autor de Mindf*ck</div>
+        </div>
+      </div>
+      <a href="https://www.youtube.com/watch?v=FXdYSQ6nu-M" target="_blank" class="resource-link" style="font-size: 12px;"><i class="fas fa-external-link-alt"></i> Ver testimonio (TEST 01)</a>
+    </div>
+
+    <div class="testimony-card fade-in">
+      <p class="testimony-quote">"Facebook fue la columna vertebral de nuestra estrategia. Creamos más de 5.9 millones de variaciones de anuncios diferentes para llegar a cada segmento exacto."</p>
+      <div class="testimony-source">
+        <div class="testimony-avatar" style="background: rgba(20,184,166,0.15); color: #2dd4bf;">BP</div>
+        <div>
+          <div class="testimony-name">Brad Parscale</div>
+          <div class="testimony-role">Director digital campaña Trump 2016 · Jefe de campaña 2020</div>
+        </div>
+      </div>
+      <a href="https://www.cbsnews.com/news/parscale-tv-news-thought-i-was-a-joke/" target="_blank" class="resource-link" style="font-size: 12px;"><i class="fas fa-external-link-alt"></i> Ver testimonio (TEST 02)</a>
+    </div>
+
+    <div class="testimony-card fade-in">
+      <p class="testimony-quote">"Diseñamos mensajes específicamente para explotar los miedos de votantes indecisos en estados clave. No era publicidad, era ingeniería psicológica."</p>
+      <div class="testimony-source">
+        <div class="testimony-avatar" style="background: rgba(20,184,166,0.15); color: #2dd4bf;">BK</div>
+        <div>
+          <div class="testimony-name">Brittany Kaiser</div>
+          <div class="testimony-role">Exempleada de Cambridge Analytica · Autora de "Targeted"</div>
+        </div>
+      </div>
+      <a href="https://www.netflix.com/sv/title/80117542" target="_blank" class="resource-link" style="font-size: 12px;"><i class="fas fa-external-link-alt"></i> Ver testimonio (TEST 03)</a>
+    </div>
+
+    <div class="testimony-card fade-in">
+      <p class="testimony-quote">"Las herramientas publicitarias de Facebook fueron diseñadas deliberadamente para permitir segmentación política extrema. No es un accidente, es el producto."</p>
+      <div class="testimony-source">
+        <div class="testimony-avatar" style="background: rgba(20,184,166,0.15); color: #2dd4bf;">RM</div>
+        <div>
+          <div class="testimony-name">Roger McNamee</div>
+          <div class="testimony-role">Inversor de Facebook · Autor de "Zucked" (2019)</div>
+        </div>
+      </div>
+      <a href="https://www.youtube.com/watch?v=OjPYmEZxACM" target="_blank" class="resource-link" style="font-size: 12px;"><i class="fas fa-external-link-alt"></i> Ver testimonio (TEST 04)</a>
+    </div>
+
+    <div class="testimony-card fade-in">
+      <p class="testimony-quote">"Los votantes en estos países no sabían que sus datos habían sido robados y usados para manipularlos. Esto no es solo un escándalo de privacidad, es una crisis democrática."</p>
+      <div class="testimony-source">
+        <div class="testimony-avatar" style="background: rgba(20,184,166,0.15); color: #2dd4bf;">CC</div>
+        <div>
+          <div class="testimony-name">Carole Cadwalladr</div>
+          <div class="testimony-role">Periodista de The Guardian · Premio Orwell · TED Talk 3M+ vistas</div>
+        </div>
+      </div>
+      <a href="https://www.ted.com/talks/carole_cadwalladr_facebook_s_role_in_brexit_and_the_threat_to_democracy" target="_blank" class="resource-link" style="font-size: 12px;"><i class="fas fa-external-link-alt"></i> Ver testimonio (TEST 05)</a>
+    </div>
+
+  </div>
+</section>
+
+<hr class="full-divider">
+
+<!-- TIMELINE DE CASOS -->
+<section id="casos">
+  <div class="section-eyebrow">Línea de tiempo · Casos de estudio CAS 01–08</div>
+  <h2 class="section-title">Evolución del microtargeting presidencial</h2>
+  <p class="section-desc">Desde Obama 2008 hasta Trump 2024: cómo se construyó y radicalizó el uso de datos para influir en el voto.</p>
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: start;">
+    <div class="timeline">
+
+      <div class="timeline-item fade-in">
+        <div class="timeline-year">2008</div>
+        <div class="timeline-title">Obama 2008 — El origen</div>
+        <p class="timeline-desc">Primer uso estratégico de Facebook para movilizar votantes jóvenes. Recauda $500M en línea. Establece el modelo del microtargeting presidencial moderno. <em>CAS 07 · Journal of IT &amp; Politics</em></p>
+      </div>
+
+      <div class="timeline-item fade-in">
+        <div class="timeline-year">2012</div>
+        <div class="timeline-title">Obama 2012 — Project Narwhal</div>
+        <p class="timeline-desc">Integra 18 bases de datos para segmentar votantes indecisos en Ohio y Virginia via Facebook y email. Primer microtargeting presidencial masivo. <em>CAS 02 · Harvard Business Review</em></p>
+      </div>
+
+      <div class="timeline-item fade-in">
+        <div class="timeline-year">2015–16</div>
+        <div class="timeline-title">Cruz y el modelo OCEAN</div>
+        <p class="timeline-desc">Primer uso del modelo psicográfico de Cambridge Analytica sobre 230 millones de perfiles de Facebook. Contrato de $750,000. Genealogía del escándalo. <em>CAS 03 · The Guardian</em></p>
+      </div>
+
+      <div class="timeline-item fade-in">
+        <div class="timeline-year">2016</div>
+        <div class="timeline-title">Trump 2016 — Dark Posts</div>
+        <p class="timeline-desc">Uso de "dark posts" para suprimir el voto de afroamericanos idealistas, jóvenes demócratas y mujeres blancas suburbanas. Caso central del microtargeting negativo. <em>CAS 01 · Bloomberg</em></p>
+      </div>
+
+    </div>
+
+    <div class="timeline">
+
+      <div class="timeline-item fade-in">
+        <div class="timeline-year">2018</div>
+        <div class="timeline-title">Bolsonaro — WhatsApp en AL</div>
+        <p class="timeline-desc">Millones de mensajes políticos personalizados y desinformación segmentada via WhatsApp Business en Brasil. El microtargeting llega a América Latina. <em>CAS 05 · NYT / CFR</em></p>
+      </div>
+
+      <div class="timeline-item fade-in">
+        <div class="timeline-year">2020</div>
+        <div class="timeline-title">Biden 2020 — COVID y datos</div>
+        <p class="timeline-desc">Mensajes diferenciados sobre COVID-19, economía y democracia a segmentos en estados bisagra. Más de $280M en publicidad digital. <em>CAS 04 · MIT Technology Review</em></p>
+      </div>
+
+      <div class="timeline-item fade-in">
+        <div class="timeline-year">2020</div>
+        <div class="timeline-title">The Social Dilemma (Netflix)</div>
+        <p class="timeline-desc">Exempleados de Facebook, Google y Twitter exponen el diseño algorítmico que crea cámaras de eco y amplifica el microtargeting electoral. <em>CAS 08 · Netflix</em></p>
+      </div>
+
+      <div class="timeline-item fade-in">
+        <div class="timeline-year">2024</div>
+        <div class="timeline-title">Trump 2024 — TikTok + Influencers</div>
+        <p class="timeline-desc">Colaboraciones con Logan Paul y Adin Ross. 14M+ seguidores en TikTok. El microtargeting se traslada al video corto y a los influencers como vectores. <em>CAS 06 · NBC News</em></p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<hr class="full-divider">
+
+<!-- MODELO OCEAN -->
+<section>
+  <div class="section-eyebrow">CONC 02 · The Great Hack · min 18:30</div>
+  <h2 class="section-title">El modelo OCEAN — núcleo del microtargeting</h2>
+  <p class="section-desc">Cambridge Analytica usó este modelo psicológico académico para construir perfiles de votantes a partir de datos de Facebook. Cada rasgo determinaba qué tipo de mensaje enviarte.</p>
+
+  <div class="ocean-grid">
+    <div class="ocean-card fade-in">
+      <div class="ocean-letter" style="color: #e04c2f;">O</div>
+      <div class="ocean-word">Openness</div>
+      <div class="ocean-desc">Apertura a nuevas experiencias. Creatividad e imaginación.</div>
+    </div>
+    <div class="ocean-card fade-in">
+      <div class="ocean-letter" style="color: #f5a623;">C</div>
+      <div class="ocean-word">Conscientiousness</div>
+      <div class="ocean-desc">Responsabilidad y autodisciplina. Orientación al orden.</div>
+    </div>
+    <div class="ocean-card fade-in">
+      <div class="ocean-letter" style="color: #14b8a6;">E</div>
+      <div class="ocean-word">Extraversion</div>
+      <div class="ocean-desc">Sociabilidad y energía. Búsqueda de estimulación social.</div>
+    </div>
+    <div class="ocean-card fade-in">
+      <div class="ocean-letter" style="color: #8b5cf6;">A</div>
+      <div class="ocean-word">Agreeableness</div>
+      <div class="ocean-desc">Tendencia a la cooperación. Empatía y confianza en otros.</div>
+    </div>
+    <div class="ocean-card fade-in">
+      <div class="ocean-letter" style="color: #3b82f6;">N</div>
+      <div class="ocean-word">Neuroticism</div>
+      <div class="ocean-desc">Inestabilidad emocional. Ansiedad, miedo e irritabilidad.</div>
+    </div>
+  </div>
+
+  <p style="margin-top: 1.5rem; font-size: 13px; color: var(--text3);">Cambridge Analytica construyó estos perfiles para 87 millones de usuarios de Facebook sin su consentimiento, usando datos de un test de personalidad distribuido como app de terceros. Fuente: Documental <em>The Great Hack</em> (Netflix, 2019) + testimonio de Christopher Wylie.</p>
+</section>
+
+<hr class="full-divider">
+
+<!-- GRÁFICOS -->
+<section id="datos">
+  <div class="section-eyebrow">Datos cuantitativos · CONT / ARC</div>
+  <h2 class="section-title">Los números del microtargeting</h2>
+  <p class="section-desc">Gasto en publicidad política digital y distribución de recursos por categoría — construidos desde el banco audiovisual.</p>
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+
+    <div class="chart-wrapper fade-in">
+      <div class="chart-title">Gasto estimado en Facebook (millones USD)</div>
+      <div style="position: relative; height: 280px;">
+        <canvas id="chartGasto" role="img" aria-label="Gasto en Facebook por campaña presidencial: Obama 2012 47M, Trump 2016 44M, Clinton 2016 28M, Trump 2020 105M, Biden 2020 195M, Trump 2024 estimado 120M">Gasto en Facebook: Obama 2012 47M, Trump 2016 44M, Clinton 2016 28M, Trump 2020 105M, Biden 2020 195M.</canvas>
+      </div>
+      <p style="font-size: 11px; color: var(--text3); margin-top: 0.75rem; font-family: var(--mono);">
+        Fuente: FEC (Comisión Federal Electoral de EE.UU.) — ARC 02 · Meta Ad Library — ARC 01
+      </p>
+    </div>
+
+    <div class="chart-wrapper fade-in">
+      <div class="chart-title">Recursos por categoría</div>
+      <div style="position: relative; height: 280px;">
+        <canvas id="chartCats" role="img" aria-label="Distribución de recursos: Contexto 8, Testimonial 5, Conceptual 5, Casos 8, Archivo 8">Distribución: CONT 8, TEST 5, CONC 5, CAS 8, ARC 8.</canvas>
+      </div>
+      <p style="font-size: 11px; color: var(--text3); margin-top: 0.75rem; font-family: var(--mono);">
+        Fuente: Clasificación interna del repositorio digital — Banco audiovisual G01 (34 recursos)
+      </p>
+    </div>
+
+    <div class="chart-wrapper fade-in" style="grid-column: 1 / -1;">
+      <div class="chart-title">Evolución del microtargeting presidencial (2008–2024)</div>
+      <div style="position: relative; height: 240px;">
+        <canvas id="chartEvo" role="img" aria-label="Evolución por año: complejidad técnica y escala del microtargeting de 2008 a 2024">Evolución: Obama 2008 básico, Obama 2012 integrado, Cruz/Trump 2016 psicográfico, Biden/Trump 2020 pandémico, Trump 2024 TikTok influencers.</canvas>
+      </div>
+      <p style="font-size: 11px; color: var(--text3); margin-top: 0.75rem; font-family: var(--mono);">
+        Fuente: Síntesis basada en CAS 01–08 (Bloomberg, Harvard Business Review, The Guardian, MIT Technology Review, NYT/CFR, NBC News, Journal of IT & Politics, Netflix) — escala relativa de complejidad y volumen de datos, estimación propia del equipo
+      </p>
+    </div>
+
+  </div>
+</section>
+
+<hr class="full-divider">
+
+<!-- iNTgrantes -->
+
+<!-- COLABORADORES -->
+<section id="colaboradores" style="position: relative; overflow: hidden;">
+
+  <!-- LÍNEA PUNTEADA SVG DE FONDO -->
+  <svg style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none;"
+       viewBox="0 0 1200 900" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M 200 60
+             C 320 100, 480 80, 520 180
+             C 560 280, 380 320, 300 360
+             C 180 410, 160 480, 240 540
+             C 340 620, 560 600, 620 700
+             C 670 780, 540 840, 440 880"
+          fill="none"
+          stroke="rgba(224,76,47,0.35)"
+          stroke-width="1.5"
+          stroke-dasharray="5 6"
+          stroke-linecap="round"/>
+  </svg>
+
+  <div class="section-eyebrow" style="position: relative; z-index: 1;">G01 · UCA · Comunicación Social</div>
+  <h2 class="section-title" style="position: relative; z-index: 1;">Colaboradores</h2>
+  <p class="section-desc" style="position: relative; z-index: 1;">El equipo detrás de este banco audiovisual sobre microtargeting político.</p>
+
+  <!-- CARDS CONTAINER -->
+  <div style="position: relative; z-index: 1; display: flex; flex-direction: column; gap: 2.5rem; margin-top: 1rem;">
+
+    <!-- CARD 1 — izquierda -->
+    <div class="fade-in" style="display: flex; justify-content: flex-start;">
+      <div style="
+        background: #c0392b;
+        border-radius: 50px;
+        padding: 1.1rem 1.75rem;
+        display: flex;
+        align-items: center;
+        gap: 1.1rem;
+        max-width: 520px;
+        width: 100%;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.45);
+      ">
+        <div style="
+          width: 52px;
+          height: 52px;
+          border-radius: 50%;
+          background: rgba(0,0,0,0.25);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+          font-size: 1.4rem;
+          color: #f0eee8;
+          font-family: var(--mono);
+          font-weight: 700;
+          border: 2px solid rgba(255,255,255,0.2);
+        ">FJ</div>
+        <div>
+          <div style="font-family: var(--font); font-weight: 700; font-size: 14.5px; color: #f5a623; margin-bottom: 3px; letter-spacing: 0.01em;">
+            Fernando de Jesús Hernández Morales
+          </div>
+          <div style="font-family: var(--font); font-size: 13px; color: rgba(255,255,255,0.9); font-weight: 500; margin-bottom: 4px;">
+            Desarrollador Web
+          </div>
+          <div style="font-family: var(--font); font-size: 12px; color: rgba(255,255,255,0.65); line-height: 1.5;">
+            Diseñó y construyó el banco audiovisual digital: arquitectura, visualizaciones interactivas, animaciones y experiencia de usuario del producto multimedia.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 2 — derecha -->
+    <div class="fade-in" style="display: flex; justify-content: flex-end;">
+      <div style="
+        background: #c0392b;
+        border-radius: 50px;
+        padding: 1.1rem 1.75rem;
+        display: flex;
+        align-items: center;
+        gap: 1.1rem;
+        max-width: 520px;
+        width: 100%;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.45);
+      ">
+        <div style="
+          width: 52px;
+          height: 52px;
+          border-radius: 50%;
+          background: rgba(0,0,0,0.25);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+          font-size: 1.4rem;
+          color: #f0eee8;
+          font-family: var(--mono);
+          font-weight: 700;
+          border: 2px solid rgba(255,255,255,0.2);
+        ">CL</div>
+        <div>
+          <div style="font-family: var(--font); font-weight: 700; font-size: 14.5px; color: #f5a623; margin-bottom: 3px; letter-spacing: 0.01em;">
+            Carlos Manuel Larios Ardón
+          </div>
+          <div style="font-family: var(--font); font-size: 13px; color: rgba(255,255,255,0.9); font-weight: 500; margin-bottom: 4px;">
+            Editor y Productor Audiovisual
+          </div>
+          <div style="font-family: var(--font); font-size: 12px; color: rgba(255,255,255,0.65); line-height: 1.5;">
+            Responsable de la producción, edición y montaje de los recursos audiovisuales del proyecto. Coordinó la narrativa visual del documental multimedia.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 3 — izquierda -->
+    <div class="fade-in" style="display: flex; justify-content: flex-start;">
+      <div style="
+        background: #c0392b;
+        border-radius: 50px;
+        padding: 1.1rem 1.75rem;
+        display: flex;
+        align-items: center;
+        gap: 1.1rem;
+        max-width: 520px;
+        width: 100%;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.45);
+      ">
+        <div style="
+          width: 52px;
+          height: 52px;
+          border-radius: 50%;
+          background: rgba(0,0,0,0.25);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+          font-size: 1.4rem;
+          color: #f0eee8;
+          font-family: var(--mono);
+          font-weight: 700;
+          border: 2px solid rgba(255,255,255,0.2);
+        ">VS</div>
+        <div>
+          <div style="font-family: var(--font); font-weight: 700; font-size: 14.5px; color: #f5a623; margin-bottom: 3px; letter-spacing: 0.01em;">
+            Valeria Sophia Hernández Bolaños
+          </div>
+          <div style="font-family: var(--font); font-size: 13px; color: rgba(255,255,255,0.9); font-weight: 500; margin-bottom: 4px;">
+            Investigadora
+          </div>
+          <div style="font-family: var(--font); font-size: 12px; color: rgba(255,255,255,0.65); line-height: 1.5;">
+            Rastreó, verificó y clasificó fuentes primarias y académicas del banco audiovisual. Contribuyó al análisis de casos de microtargeting en contextos electorales.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 4 — derecha -->
+    <div class="fade-in" style="display: flex; justify-content: flex-end;">
+      <div style="
+        background: #c0392b;
+        border-radius: 50px;
+        padding: 1.1rem 1.75rem;
+        display: flex;
+        align-items: center;
+        gap: 1.1rem;
+        max-width: 520px;
+        width: 100%;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.45);
+      ">
+        <div style="
+          width: 52px;
+          height: 52px;
+          border-radius: 50%;
+          background: rgba(0,0,0,0.25);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+          font-size: 1.4rem;
+          color: #f0eee8;
+          font-family: var(--mono);
+          font-weight: 700;
+          border: 2px solid rgba(255,255,255,0.2);
+        ">FS</div>
+        <div>
+          <div style="font-family: var(--font); font-weight: 700; font-size: 14.5px; color: #f5a623; margin-bottom: 3px; letter-spacing: 0.01em;">
+            Fernanda Steffani Cortez Maldonado
+          </div>
+          <div style="font-family: var(--font); font-size: 13px; color: rgba(255,255,255,0.9); font-weight: 500; margin-bottom: 4px;">
+            Investigadora
+          </div>
+          <div style="font-family: var(--font); font-size: 12px; color: rgba(255,255,255,0.65); line-height: 1.5;">
+            Investigó el marco regulatorio, los casos latinoamericanos y la evolución histórica del microtargeting.
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>Universidad Centroamericana José Simeón Cañas (UCA) · Comunicación Social · Grupo 01 · · Docente: Ivon Rivera</p>
+  <p style="margin-top: 0.5rem;">Banco audiovisual para proyecto multimedia — Evaluación 4 · <a href="#">Herramientas de recolección de datos</a></p>
+  <p style="margin-top: 0.5rem;">El uso de tácticas de microtargeting por presidentes en Facebook, Instagram y TikTok durante períodos electorales</p>
+</footer>
+
+<script>
+  //fondo 
+  
+// FILTER
+function filterResources(cat, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.resource-card[data-cat]').forEach(card => {
+    if (cat === 'all' || card.dataset.cat === cat) {
+      card.classList.remove('hidden');
+    } else {
+      card.classList.add('hidden');
+    }
+  });
+}
+
+// CHART — Gasto
+new Chart(document.getElementById('chartGasto'), {
+  type: 'bar',
+  data: {
+    labels: ['Obama\n2012', 'Trump\n2016', 'Clinton\n2016', 'Trump\n2020', 'Biden\n2020', 'Trump\n2024'],
+    datasets: [{
+      label: 'Millones USD',
+      data: [47, 44, 28, 105, 195, 120],
+      backgroundColor: ['#3b82f6','#e04c2f','#6b7280','#e04c2f','#3b82f6','#e04c2f'],
+      borderRadius: 4,
+      borderSkipped: false,
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { ticks: { color: '#6b6968', font: { size: 11 } }, grid: { color: 'rgba(255,255,255,0.05)' } },
+      y: {
+        ticks: {
+          color: '#6b6968', font: { size: 11 },
+          callback: v => '$' + v + 'M'
+        },
+        grid: { color: 'rgba(255,255,255,0.05)' }
+      }
+    }
+  }
+});
+
+// CHART — Categorías
+new Chart(document.getElementById('chartCats'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Contexto (CONT)', 'Testimonial (TEST)', 'Conceptual (CONC)', 'Casos (CAS)', 'Archivo (ARC)'],
+    datasets: [{
+      data: [8, 5, 5, 8, 8],
+      backgroundColor: ['#3b82f6', '#14b8a6', '#8b5cf6', '#f5a623', '#e04c2f'],
+      borderWidth: 0,
+      hoverOffset: 4,
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'right',
+        labels: { color: '#a09e98', font: { size: 11 }, boxWidth: 12, padding: 16 }
+      }
+    },
+    cutout: '65%'
+  }
+});
+
+// CHART — Evolución
+new Chart(document.getElementById('chartEvo'), {
+  type: 'line',
+  data: {
+    labels: ['2008', '2012', '2015', '2016', '2018', '2020', '2024'],
+    datasets: [
+      {
+        label: 'Complejidad técnica',
+        data: [2, 4, 6, 8, 7, 9, 10],
+        borderColor: '#e04c2f',
+        backgroundColor: 'rgba(224,76,47,0.1)',
+        tension: 0.4,
+        fill: true,
+        pointBackgroundColor: '#e04c2f',
+        pointRadius: 5,
+      },
+      {
+        label: 'Escala de datos',
+        data: [1, 3, 5, 9, 8, 9, 10],
+        borderColor: '#3b82f6',
+        backgroundColor: 'rgba(59,130,246,0.05)',
+        tension: 0.4,
+        fill: true,
+        pointBackgroundColor: '#3b82f6',
+        pointRadius: 5,
+        borderDash: [4, 4],
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { labels: { color: '#a09e98', font: { size: 11 }, boxWidth: 12 } }
+    },
+    scales: {
+      x: { ticks: { color: '#6b6968', font: { size: 11 } }, grid: { color: 'rgba(255,255,255,0.05)' } },
+      y: {
+        ticks: { color: '#6b6968', font: { size: 11 } },
+        grid: { color: 'rgba(255,255,255,0.05)' },
+        min: 0,
+        max: 11
+      }
+    }
+  }
+});
+
+// FADE-IN OBSERVER
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+// ANIMACIÓN DE FONDO BINARIO DE ALTO IMPACTO
+const canvas = document.getElementById('binaryCanvas');
+const ctx = canvas.getContext('2d');
+
+function resizeCanvas() {
+    const heroSection = canvas.parentElement;
+    canvas.width = heroSection.offsetWidth;
+    canvas.height = heroSection.offsetHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+const fontSize = 16; // Un poco más grande para mejor definición
+const columns = Math.floor(canvas.width / fontSize);
+const rainDrops = Array(columns).fill(1);
+
+function drawBinaryRain() {
+    // Fondo con la opacidad justa para dejar una estela nítida pero sin saturar
+    ctx.fillStyle = 'rgba(10, 10, 15, 0.08)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.font = `bold ${fontSize}px "Space Mono", monospace`;
+
+    for (let i = 0; i < rainDrops.length; i++) {
+        const text = Math.random() > 0.5 ? '1' : '0';
+        const x = i * fontSize;
+        const y = rainDrops[i] * fontSize;
+
+        // EFECTO DE COLOR: Los números normales varían entre el rojo y el naranja de tu CSS
+        if (Math.random() > 0.98) {
+            // El "bit" líder de la fila brilla intensamente en blanco
+            ctx.fillStyle = '#ffffff';
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = '#e04c2f';
+        } else {
+            // El resto de la cascada tiene el tono de tu marca
+            ctx.fillStyle = Math.random() > 0.5 ? '#e04c2f' : '#f5a623';
+            ctx.shadowBlur = 4;
+            ctx.shadowColor = '#e04c2f';
+        }
+
+        ctx.fillText(text, x, y);
+        
+        // Reset del blur para no ralentizar el navegador
+        ctx.shadowBlur = 0;
+
+        if (y > canvas.height && Math.random() > 0.98) {
+            rainDrops[i] = 0;
+        }
+        rainDrops[i]++;
+    }
+}
+
+// Control de velocidad estable (aproximadamente 24 cuadros por segundo)
+setInterval(drawBinaryRain, 45);
+</script>
+</body>
+</html>
